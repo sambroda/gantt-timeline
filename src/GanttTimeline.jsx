@@ -13,9 +13,30 @@ const days = (a,b) => (parseDate(b)-parseDate(a))/86400000;
 const fmt = (v,locale) => Number.isFinite(parseDate(v)) ? new Intl.DateTimeFormat(locale,{day:"2-digit",month:"2-digit",year:"numeric",timeZone:"UTC"}).format(new Date(parseDate(v))) : "—";
 const month = (v,locale) => Number.isFinite(parseDate(v)) ? new Intl.DateTimeFormat(locale,{month:"long",year:"numeric",timeZone:"UTC"}).format(new Date(parseDate(v))) : "";
 function ticks(start,end) {
- const span=Math.max(1,days(start,end)), step=span>300?30:span>160?14:span>75?7:span>35?5:1, out=[];
- for(let i=0;i<=span;i+=step) out.push(addDays(start,i));
- if(out[out.length-1]!==end) out.push(end); return out;
+ const span=Math.max(1,days(start,end));
+ // Choose calendar-aligned intervals so labels remain readable and predictable.
+ const stepMonths=span>1100?6:span>520?3:span>260?2:span>150?1:0;
+ const out=[];
+ if(stepMonths){
+  const startDate=new Date(parseDate(start)), endDate=new Date(parseDate(end));
+  let cursor=new Date(Date.UTC(startDate.getUTCFullYear(),startDate.getUTCMonth(),1));
+  while(cursor<=endDate){
+   const d=cursor.toISOString().slice(0,10);
+   if(d>=start && d<=end) out.push(d);
+   cursor=new Date(Date.UTC(cursor.getUTCFullYear(),cursor.getUTCMonth()+stepMonths,1));
+  }
+ } else {
+  const step=span>75?14:span>35?7:Math.max(1,Math.ceil(span/8));
+  for(let i=0;i<=span;i+=step) out.push(addDays(start,i));
+ }
+ if(!out.length || out[0]!==start) out.unshift(start);
+ if(out[out.length-1]!==end) out.push(end);
+ return out;
+}
+function tickLabel(v,locale,span) {
+ const d=new Date(parseDate(v));
+ if(span>150) return new Intl.DateTimeFormat(locale,{month:"short",timeZone:"UTC"}).format(d);
+ return new Intl.DateTimeFormat(locale,{day:"2-digit",month:"2-digit",timeZone:"UTC"}).format(d);
 }
 
 /**
@@ -35,9 +56,11 @@ export function GanttTimeline({
   const low=Math.min(...bounds),high=Math.max(...bounds),span=Math.max(1,(high-low)/86400000),pad=Math.max(14,Math.ceil(span*.14));
   const start=addDays(iso(low),-pad),end=addDays(iso(high),pad),plotX=labelWidth,plotW=chartWidth,top=58,height=top+data.length*rowHeight+25;
   const x=d=>plotX+days(start,d)/Math.max(1,days(start,end))*plotW;
-  return {start,end,ticks:ticks(start,end),plotX,plotW,top,height,x};
+  const axisTicks=ticks(start,end);
+  const yearTicks=axisTicks.filter((t,i)=>i===0 || new Date(parseDate(t)).getUTCFullYear()!==new Date(parseDate(axisTicks[i-1])).getUTCFullYear());
+  return {start,end,ticks:axisTicks,yearTicks,span,plotX,plotW,top,height,x};
  },[data,today,labelWidth,chartWidth,rowHeight]);
- const {start,end,plotX,plotW,top,height,x}=m, width=labelWidth+chartWidth+30;
+ const {start,end,plotX,plotW,top,height,x,span}=m, width=labelWidth+chartWidth+30;
  const tx=x(Number.isFinite(parseDate(today))?today:iso(Date.now()));
  function activate(r) {
   if(onRecordClick) onRecordClick(r);
@@ -49,8 +72,9 @@ export function GanttTimeline({
    {showToday&&<span><i className="gt-today-key"/>{text.today}: {fmt(today,locale)}</span>}
   </div>}
   <div className="gt-scroll"><svg style={{minWidth}} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={labels.ariaLabel||"Gantt timeline"}>
-   <text x={plotX} y="16" className="gt-month">{month(start,locale)}</text><text x={plotX+plotW} y="16" textAnchor="end" className="gt-month">{month(end,locale)}</text>
-   {m.ticks.map(t=><g key={t}><line x1={x(t)} x2={x(t)} y1={top-10} y2={height-12} className="gt-grid"/><text x={x(t)} y="39" textAnchor="middle" className="gt-tick">{fmt(t,locale).slice(0,5)}</text></g>)}
+
+   {span>150 && m.yearTicks.map(t=><text key={`year-${t}`} x={x(t)+3} y="16" className="gt-year">{new Date(parseDate(t)).getUTCFullYear()}</text>)}
+   {m.ticks.map(t=><g key={t}><line x1={x(t)} x2={x(t)} y1={top-10} y2={height-12} className="gt-grid"/><text x={x(t)} y="39" textAnchor="middle" className="gt-tick">{tickLabel(t,locale,span)}</text></g>)}
    {data.map((r,i)=>{
     const y=top+i*rowHeight, begin=r.validFrom, endDate=r.invalidFrom||end, sx=x(begin), ex=Math.max(sx+3,Math.min(plotX+plotW,x(endDate))), mx=x(r.mandatoryFrom), ix=x(r.invalidFrom||end), clickable=Boolean(r.url||onRecordClick);
     return <g key={r.id??i} className={`gt-row${clickable?" gt-clickable":""}`} onClick={clickable?()=>activate(r):undefined}
