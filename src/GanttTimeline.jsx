@@ -63,7 +63,7 @@ export function GanttTimeline({
       {r.invalidFrom?<circle cx={ix} cy={y+33} r="6.5" fill={color.invalidFrom} stroke="#fff" strokeWidth="2"><title>{`${text.invalidFrom}: ${fmt(r.invalidFrom,locale)}`}</title></circle>:<path d={`M ${ex-7} ${y+24} L ${ex+1} ${y+33} L ${ex-7} ${y+42}`} fill="none" stroke={color.bar} strokeWidth="2.3"><title>{text.openEnded}</title></path>}
      </g>;
    })}
-   {showToday&&<><line x1={tx} x2={tx} y1="22" y2={height-12} className="gt-todayline"/><rect x={Math.max(plotX,Math.min(width-75,tx-30))} y="2" width="60" height="17" rx="5" className="gt-todaypill"/><text x={Math.max(plotX,Math.min(width-75,tx-30))+30} y="14" textAnchor="middle" className="gt-todaytext">{text.today}</text></>}
+   {showToday&&<><line x1={tx} x2={tx} y1="22" y2={height-12} className="gt-todayline" stroke="#e5484d" strokeWidth="2" strokeDasharray="6 5"/><rect x={Math.max(plotX,Math.min(width-75,tx-30))} y="2" width="60" height="17" rx="5" className="gt-todaypill" fill="#e5484d" stroke="#ffffff" strokeWidth="1"/><text x={Math.max(plotX,Math.min(width-75,tx-30))+30} y="14" textAnchor="middle" className="gt-todaytext" fill="#ffffff" fontSize="9" fontWeight="850">{text.today}</text></>}
   </svg></div>
  </div>;
 }
