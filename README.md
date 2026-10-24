@@ -36,8 +36,11 @@ npm install @sambroda/gantt-timeline
 
 ## Basic usage
 
+**Import the package stylesheet explicitly.** The JavaScript entry points do not automatically load the extracted CSS file. Without this import, the component can render while visual details such as the legend symbols are unstyled.
+
 ```jsx
 import GanttTimeline from "@sambroda/gantt-timeline";
+import "@sambroda/gantt-timeline/style.css";
 
 const records = [
   {
@@ -81,23 +84,23 @@ Records render in exactly the order they appear in `data`; no role/category fiel
 
 ## API reference
 
-| Prop                | Type               | Default         | Description                                                                                                                                        |
-| ------------------- | ------------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `data`              | `GanttRecord[]`    | `[]`            | Records, in display order.                                                                                                                         |
-| `today`             | `string`           | Current date    | ISO date for the vertical today marker.                                                                                                            |
-| `locale`            | `string`           | `en-GB`         | Locale used by `Intl.DateTimeFormat`.                                                                                                              |
-| `labels`            | `object`           | English labels  | Overrides `validFrom`, `mandatoryFrom`, `invalidFrom`, `today`, `openEnded`, and `ariaLabel`.                                                      |
-| `colors`            | `object`           | Built-in colors | Overrides `bar`, `validFrom`, `mandatoryFrom`, and `invalidFrom`.                                                                                  |
-| `showToday`         | `boolean`          | `true`          | Show today line and legend entry.                                                                                                                  |
-| `showLegend`        | `boolean`          | `true`          | Show the marker legend.                                                                                                                            |
-| `showRecordLabels`  | `boolean`          | `true`          | Show IDs, labels and URLs to the left of the timeline. IDs and labels can be clicked or keyboard-activated to focus the corresponding date range.  |
-| `className`         | `string`           | `""`            | Adds a class to the component root.                                                                                                                |
-| `minWidth`          | `number`           | `760`           | Minimum SVG width; narrow containers scroll horizontally.                                                                                          |
-| `rowHeight`         | `number`           | `72`            | Vertical spacing per record.                                                                                                                       |
-| `labelWidth`        | `number`           | `280`           | Width of the record information column.                                                                                                            |
-| `chartWidth`        | `number`           | `850`           | Width of the date plotting area.                                                                                                                   |
-| `onRecordClick`     | `(record) => void` | —               | Optional callback invoked when the record URL link is activated. If supplied, it handles the action instead of opening `record.url` automatically. |
-| `openLinksInNewTab` | `boolean`          | `true`          | Open record URLs in a new tab when no callback is supplied. New tabs use `noopener,noreferrer`.                                                    |
+| Prop                | Type               | Default         | Description                                                                                     |
+| ------------------- | ------------------ | --------------- | ----------------------------------------------------------------------------------------------- |
+| `data`              | `GanttRecord[]`    | `[]`            | Records, in display order.                                                                      |
+| `today`             | `string`           | Current date    | ISO date for the vertical today marker.                                                         |
+| `locale`            | `string`           | `en-GB`         | Locale used by `Intl.DateTimeFormat`.                                                           |
+| `labels`            | `object`           | English labels  | Overrides `validFrom`, `mandatoryFrom`, `invalidFrom`, `today`, `openEnded`, and `ariaLabel`.   |
+| `colors`            | `object`           | Built-in colors | Overrides `bar`, `validFrom`, `mandatoryFrom`, and `invalidFrom`.                               |
+| `showToday`         | `boolean`          | `true`          | Show today line and legend entry.                                                               |
+| `showLegend`        | `boolean`          | `true`          | Show the marker legend.                                                                         |
+| `showRecordLabels`  | `boolean`          | `true`          | Show IDs, labels and URLs to the left of the timeline.                                          |
+| `className`         | `string`           | `""`            | Adds a class to the component root.                                                             |
+| `minWidth`          | `number`           | `760`           | Minimum SVG width; narrow containers scroll horizontally.                                       |
+| `rowHeight`         | `number`           | `72`            | Vertical spacing per record.                                                                    |
+| `labelWidth`        | `number`           | `280`           | Width of the record information column.                                                         |
+| `chartWidth`        | `number`           | `850`           | Width of the date plotting area.                                                                |
+| `onRecordClick`     | `(record) => void` | —               | Optional click callback. If supplied, it takes precedence over opening `record.url`.            |
+| `openLinksInNewTab` | `boolean`          | `true`          | Open record URLs in a new tab when no callback is supplied. New tabs use `noopener,noreferrer`. |
 
 ### Colors
 
@@ -132,20 +135,13 @@ Records render in exactly the order they appear in `data`; no role/category fiel
 
 ### URL behavior
 
-Set `url` on a record to display a clickable URL link. **Only the URL itself activates navigation**; clicking elsewhere in the row does not open it. By default, the URL opens in a new browser tab. Provide `onRecordClick` to handle the link action yourself (for example with React Router); when supplied, it is called instead of opening `record.url` automatically.
+Set `url` on a record to make its row interactive. By default the URL opens in a new browser tab. Provide `onRecordClick` to handle navigation yourself (for example with React Router); when supplied, it overrides the built-in URL behavior. The URL is not rendered as trusted HTML. Validate or allowlist external URLs in the host application if input data is untrusted.
 
-Clicking an entry’s **ID or label** focuses the timeline on that record’s date range. Click the same ID or label again to clear the focus and return to the full timeline. This interaction is also available by keyboard using Enter or Space. Records without any valid timeline dates cannot be focused. The URL is not rendered as trusted HTML. Validate or allowlist external URLs in the host application if input data is untrusted.
+## CSS and customization
 
-## CSS customization
+Import `@sambroda/gantt-timeline/style.css` once in your application (for example, in the component/module that uses `GanttTimeline` or in your app entry point). This is the package's public stylesheet export. It includes the component layout, timeline markers, and legend symbols. Vite and other CSS-aware bundlers will then include the stylesheet in the application build.
 
-Import the package stylesheet alongside the component. This is required because library builds emit CSS as a separate file. Class names use the `gt-` prefix to reduce collisions.
-
-```jsx
-import GanttTimeline from "@sambroda/gantt-timeline";
-import "@sambroda/gantt-timeline/style.css";
-```
-
-Theme the chart with CSS custom properties:
+Class names use the `gt-` prefix to reduce collisions. Theme the chart with CSS custom properties:
 
 ```css
 .my-timeline {
@@ -182,6 +178,60 @@ The demo dependency is `file:..`, so it uses the local package directory. After 
 ## Build output
 
 `npm run build` creates distributable ESM and CommonJS bundles plus TypeScript declaration output under `dist/`. React is a peer dependency, so consumers use their own React installation.
+
+## Release workflow (maintainers)
+
+Run these commands from the repository root. Review the changes and make sure the working tree is in the expected state before releasing.
+
+1. Validate the package:
+
+   ```bash
+   npm run lint
+   npm run build
+   npm pack --dry-run
+   ```
+
+   If the repository defines a format-check script, run that too. Confirm that `dist/style.css` is generated and contains the component and legend styles.
+
+2. Commit the intended source/documentation changes:
+
+   ```bash
+   git add .
+   git commit -m "docs: clarify stylesheet import and release workflow"
+   ```
+
+   Adjust the commit message to describe the actual changes.
+
+3. Before versioning, check the current package version and whether the next Git tag is already present:
+
+   ```bash
+   node -p "require('./package.json').version"
+   git tag --list "v*"
+   git status
+   ```
+
+   `npm version patch` increments the version in the local `package.json` (and lockfile, if present) by one patch level and creates a version commit and Git tag. It does **not** find the next unused version by checking npm or existing Git tags. If the next tag already exists, stop and investigate; do not delete or force-move a published tag.
+
+4. If the working tree is clean and the next version/tag is confirmed to be unused, create the release version:
+
+   ```bash
+   npm version patch
+   ```
+
+5. Push the commits and tags:
+
+   ```bash
+   git push
+   git push --tags
+   ```
+
+6. Verify the CI/release workflow and the published package. For example:
+
+   ```bash
+   npm pack @sambroda/gantt-timeline@<version>
+   ```
+
+   Inspect the archive to confirm it contains `package/dist/style.css`, the JavaScript bundles, and the expected `package.json` exports. Only consider the release complete once the intended version is available on npm and its contents are verified.
 
 ## License
 
