@@ -12,8 +12,6 @@ A reusable React SVG Gantt component distributed as an npm package. The chart is
 - **npm package:** https://www.npmjs.com/package/@sambroda/gantt-timeline
 - **License:** MIT
 
-The `author`, `repository`, `homepage`, `bugs`, `license`, and `keywords` fields in `package.json` provide package metadata that npm can display on the package page. npm publishing permissions are managed by npm; the `author` field identifies the author but does not grant publish access.
-
 ## Features
 
 - One bar per input record; array order determines row order.
@@ -156,15 +154,14 @@ Then use `<GanttTimeline className="my-timeline" data={records} />`.
 
 The repository contains a `demo/` app that consumes the package from the local filesystem. This is the recommended way to iterate without publishing each change.
 
-1. Replace `@sambroda` everywhere in `package.json`, `demo/package.json`, `demo/src.jsx`, and this README with your actual npm scope.
-2. From the repository root, build the package:
+1. From the repository root, install dependencies and build the package:
 
    ```bash
    npm install
    npm run build
    ```
 
-3. Install and run the demo:
+2. Install and run the demo:
 
    ```bash
    cd demo
@@ -172,25 +169,7 @@ The repository contains a `demo/` app that consumes the package from the local f
    npm run dev
    ```
 
-The demo dependency is `file:..`, so it uses the local package directory. After changing package source, rerun `npm run build` in the root and restart/refresh the demo if needed. If npm has cached the local package contents, run `npm install` in `demo` again. Do not use `npm link` as the default workflow; a `file:` dependency is generally more predictable.
-
-## Publishing through GitHub Actions
-
-The workflow `.github/workflows/publish.yml` builds and publishes when a version tag like `v1.0.0` is pushed. It can also be started manually from the GitHub Actions tab.
-
-1. Create an npm account and reserve the package name/scope.
-2. The package scope is already configured as `@sambroda/gantt-timeline`.
-3. Configure the GitHub repository secret `NPM_TOKEN` with an npm automation/access token that has permission to publish the package.
-4. Commit and push your changes.
-5. Update `version` in `package.json` before each release.
-6. Tag and push the release:
-
-   ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
-   ```
-
-The workflow runs `npm ci`, builds the library, then runs `npm publish --access public`. Make sure the package name is available and the npm token is configured. npm's trusted publishing/OIDC configuration can be used instead of a token where your npm account and repository support it; the included workflow uses `NPM_TOKEN` for a straightforward initial setup.
+The demo dependency is `file:..`, so it uses the local package directory. After changing package source, rerun `npm run build` in the root and restart or refresh the demo if needed. If npm has cached the local package contents, run `npm install` in `demo` again.
 
 ## Build output
 
