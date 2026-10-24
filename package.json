@@ -26,7 +26,7 @@
     "dev": "vite --host 0.0.0.0",
     "preview": "vite preview",
     "prepublishOnly": "npm run build",
-    "test:local": "npm link && cd demo && npm link @YOUR_NPM_USERNAME/gantt-timeline"
+    "test:local": "npm link && cd demo && npm link @sambroda/gantt-timeline"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
