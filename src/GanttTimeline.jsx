@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import "./GanttTimeline.css";
 
 const DEFAULT_LABELS = {
@@ -30,14 +30,6 @@ const fmt = (v, locale) =>
         timeZone: "UTC",
       }).format(new Date(parseDate(v)))
     : "—";
-const month = (v, locale) =>
-  Number.isFinite(parseDate(v))
-    ? new Intl.DateTimeFormat(locale, {
-        month: "long",
-        year: "numeric",
-        timeZone: "UTC",
-      }).format(new Date(parseDate(v)))
-    : "";
 function ticks(start, end) {
   const span = Math.max(1, days(start, end));
   // Choose calendar-aligned intervals so labels remain readable and predictable.
@@ -163,7 +155,7 @@ export function GanttTimeline({
       x,
     };
   }, [data, today, labelWidth, chartWidth, rowHeight, focusedRecordId]);
-  const { start, end, plotX, plotW, top, height, x, span } = m,
+  const { end, plotX, plotW, top, height, x, span } = m,
     width = labelWidth + chartWidth + 30;
   const tx = x(Number.isFinite(parseDate(today)) ? today : iso(Date.now()));
   function focusRecord(r) {
