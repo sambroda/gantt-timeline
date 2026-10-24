@@ -26,21 +26,33 @@
     "dev": "vite --host 0.0.0.0",
     "preview": "vite preview",
     "prepublishOnly": "npm run build",
-    "test:local": "npm link && cd demo && npm link @sambroda/gantt-timeline"
+    "test:local": "npm link && cd demo && npm link @sambroda/gantt-timeline",
+    "lint": "eslint src demo",
+    "prepare": "husky",
+    "lint:fix": "eslint src demo --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx,css,json}\" \"demo/**/*.{js,jsx,css,json,html}\" \"*.{js,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,css,json}\" \"demo/**/*.{js,jsx,css,json,html}\" \"*.{js,json,md,yml,yaml}\""
   },
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
+    "@eslint/js": "^10.0.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^15.14.0",
+    "husky": "^9.1.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "typescript": "^5.7.2",
     "vite": "^6.0.7",
     "vite-plugin-dts": "^4.5.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "prettier": "^3.6.2",
+    "lint-staged": "^16.2.7"
   },
   "author": {
     "name": "Sam Broda",
@@ -62,5 +74,14 @@
     "svg",
     "date",
     "visualization"
-  ]
+  ],
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,json,md,html,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
 }

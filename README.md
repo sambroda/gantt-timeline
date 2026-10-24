@@ -2,7 +2,6 @@
 
 A reusable React SVG Gantt component distributed as an npm package. The chart is built with React and SVG and does not depend on a third-party charting library.
 
-
 ## Project links and maintainer
 
 - **Author / maintainer:** Sam Broda
@@ -47,7 +46,7 @@ const records = [
     validFrom: "2025-09-26",
     mandatoryFrom: "2026-10-16",
     invalidFrom: null,
-    url: "https://example.com/record/V-01"
+    url: "https://example.com/record/V-01",
   },
   {
     id: "A-01",
@@ -55,8 +54,8 @@ const records = [
     validFrom: "2026-10-12",
     mandatoryFrom: "2026-11-05",
     invalidFrom: "2026-12-29",
-    url: "https://example.com/record/A-01"
-  }
+    url: "https://example.com/record/A-01",
+  },
 ];
 
 export default function Page() {
@@ -70,10 +69,10 @@ export default function Page() {
 type GanttRecord = {
   id: string;
   label: string;
-  validFrom: string;       // required ISO date: YYYY-MM-DD
-  mandatoryFrom: string;   // required ISO date: YYYY-MM-DD
+  validFrom: string; // required ISO date: YYYY-MM-DD
+  mandatoryFrom: string; // required ISO date: YYYY-MM-DD
   invalidFrom: string | null; // ISO date, or null for open-ended
-  url?: string;            // optional absolute URL
+  url?: string; // optional absolute URL
   [key: string]: unknown;
 };
 ```
@@ -82,23 +81,23 @@ Records render in exactly the order they appear in `data`; no role/category fiel
 
 ## API reference
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `data` | `GanttRecord[]` | `[]` | Records, in display order. |
-| `today` | `string` | Current date | ISO date for the vertical today marker. |
-| `locale` | `string` | `en-GB` | Locale used by `Intl.DateTimeFormat`. |
-| `labels` | `object` | English labels | Overrides `validFrom`, `mandatoryFrom`, `invalidFrom`, `today`, `openEnded`, and `ariaLabel`. |
-| `colors` | `object` | Built-in colors | Overrides `bar`, `validFrom`, `mandatoryFrom`, and `invalidFrom`. |
-| `showToday` | `boolean` | `true` | Show today line and legend entry. |
-| `showLegend` | `boolean` | `true` | Show the marker legend. |
-| `showRecordLabels` | `boolean` | `true` | Show IDs, labels and URLs to the left of the timeline. IDs and labels can be clicked or keyboard-activated to focus the corresponding date range. |
-| `className` | `string` | `""` | Adds a class to the component root. |
-| `minWidth` | `number` | `760` | Minimum SVG width; narrow containers scroll horizontally. |
-| `rowHeight` | `number` | `72` | Vertical spacing per record. |
-| `labelWidth` | `number` | `280` | Width of the record information column. |
-| `chartWidth` | `number` | `850` | Width of the date plotting area. |
-| `onRecordClick` | `(record) => void` | — | Optional callback invoked when the record URL link is activated. If supplied, it handles the action instead of opening `record.url` automatically. |
-| `openLinksInNewTab` | `boolean` | `true` | Open record URLs in a new tab when no callback is supplied. New tabs use `noopener,noreferrer`. |
+| Prop                | Type               | Default         | Description                                                                                                                                        |
+| ------------------- | ------------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`              | `GanttRecord[]`    | `[]`            | Records, in display order.                                                                                                                         |
+| `today`             | `string`           | Current date    | ISO date for the vertical today marker.                                                                                                            |
+| `locale`            | `string`           | `en-GB`         | Locale used by `Intl.DateTimeFormat`.                                                                                                              |
+| `labels`            | `object`           | English labels  | Overrides `validFrom`, `mandatoryFrom`, `invalidFrom`, `today`, `openEnded`, and `ariaLabel`.                                                      |
+| `colors`            | `object`           | Built-in colors | Overrides `bar`, `validFrom`, `mandatoryFrom`, and `invalidFrom`.                                                                                  |
+| `showToday`         | `boolean`          | `true`          | Show today line and legend entry.                                                                                                                  |
+| `showLegend`        | `boolean`          | `true`          | Show the marker legend.                                                                                                                            |
+| `showRecordLabels`  | `boolean`          | `true`          | Show IDs, labels and URLs to the left of the timeline. IDs and labels can be clicked or keyboard-activated to focus the corresponding date range.  |
+| `className`         | `string`           | `""`            | Adds a class to the component root.                                                                                                                |
+| `minWidth`          | `number`           | `760`           | Minimum SVG width; narrow containers scroll horizontally.                                                                                          |
+| `rowHeight`         | `number`           | `72`            | Vertical spacing per record.                                                                                                                       |
+| `labelWidth`        | `number`           | `280`           | Width of the record information column.                                                                                                            |
+| `chartWidth`        | `number`           | `850`           | Width of the date plotting area.                                                                                                                   |
+| `onRecordClick`     | `(record) => void` | —               | Optional callback invoked when the record URL link is activated. If supplied, it handles the action instead of opening `record.url` automatically. |
+| `openLinksInNewTab` | `boolean`          | `true`          | Open record URLs in a new tab when no callback is supplied. New tabs use `noopener,noreferrer`.                                                    |
 
 ### Colors
 
@@ -109,7 +108,7 @@ Records render in exactly the order they appear in `data`; no role/category fiel
     bar: "#438cf0",
     validFrom: "#438cf0",
     mandatoryFrom: "#526782",
-    invalidFrom: "#27a66a"
+    invalidFrom: "#27a66a",
   }}
 />
 ```
@@ -126,7 +125,7 @@ Records render in exactly the order they appear in `data`; no role/category fiel
     invalidFrom: "UNGÜLTIG AB",
     today: "HEUTE",
     openEnded: "Offen",
-    ariaLabel: "Gantt-Zeitachse"
+    ariaLabel: "Gantt-Zeitachse",
   }}
 />
 ```
