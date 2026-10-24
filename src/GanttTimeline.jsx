@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import "./GanttTimeline.css";
 
 const DEFAULT_LABELS = { validFrom:"VALID FROM", mandatoryFrom:"MANDATORY FROM", invalidFrom:"INVALID FROM", today:"TODAY", openEnded:"Open-ended" };
@@ -48,10 +48,12 @@ export function GanttTimeline({
  showRecordLabels=true, className="", minWidth=760, rowHeight=72, labelWidth=280, chartWidth=850,
  onRecordClick, openLinksInNewTab=true
 }) {
+ const [focusedRecordId, setFocusedRecordId] = useState(null);
  const text={...DEFAULT_LABELS,...labels};
  const color={bar:"#438cf0",validFrom:"#438cf0",mandatoryFrom:"#526782",invalidFrom:"#27a66a",...colors};
  const m=useMemo(()=>{
-  const dates=[today]; data.forEach(r=>dates.push(r.validFrom,r.mandatoryFrom,...(r.invalidFrom?[r.invalidFrom]:[])));
+  const focused = focusedRecordId == null ? null : data.find(r => String(r.id) === String(focusedRecordId));
+  const dates = focused ? [focused.validFrom, focused.mandatoryFrom, ...(focused.invalidFrom ? [focused.invalidFrom] : [])] : [today, ...data.flatMap(r => [r.validFrom, r.mandatoryFrom, ...(r.invalidFrom ? [r.invalidFrom] : [])])];
   const valid=dates.flat().map(parseDate).filter(Number.isFinite), bounds=valid.length?valid:[Date.now()];
   const low=Math.min(...bounds),high=Math.max(...bounds),span=Math.max(1,(high-low)/86400000),pad=Math.max(14,Math.ceil(span*.14));
   const start=addDays(iso(low),-pad),end=addDays(iso(high),pad),plotX=labelWidth,plotW=chartWidth,top=58,height=top+data.length*rowHeight+25;
@@ -59,13 +61,15 @@ export function GanttTimeline({
   const axisTicks=ticks(start,end);
   const yearTicks=axisTicks.filter((t,i)=>i===0 || new Date(parseDate(t)).getUTCFullYear()!==new Date(parseDate(axisTicks[i-1])).getUTCFullYear());
   return {start,end,ticks:axisTicks,yearTicks,span,plotX,plotW,top,height,x};
- },[data,today,labelWidth,chartWidth,rowHeight]);
+ },[data,today,labelWidth,chartWidth,rowHeight,focusedRecordId]);
  const {start,end,plotX,plotW,top,height,x,span}=m, width=labelWidth+chartWidth+30;
  const tx=x(Number.isFinite(parseDate(today))?today:iso(Date.now()));
- function activate(r) {
-  if(onRecordClick) onRecordClick(r);
-  else if(r.url) window.open(r.url,openLinksInNewTab?"_blank":"_self",openLinksInNewTab?"noopener,noreferrer":undefined);
+ function focusRecord(r) { setFocusedRecordId(current => String(current) === String(r.id) ? null : r.id); }
+ function activateLink(r) {
+  if (onRecordClick) onRecordClick(r);
+  else if (r.url) window.open(r.url, openLinksInNewTab ? "_blank" : "_self", openLinksInNewTab ? "noopener,noreferrer" : undefined);
  }
+
  return <div className={`gt-root ${className}`}>
   {showLegend&&<div className="gt-legend">
    <span><i className="gt-key gt-valid-key"/>{text.validFrom}</span><span><i className="gt-key gt-mandatory-key"/>{text.mandatoryFrom}</span><span><i className="gt-key gt-invalid-key"/>{text.invalidFrom}</span>
@@ -76,16 +80,20 @@ export function GanttTimeline({
    {span>150 && m.yearTicks.map(t=><text key={`year-${t}`} x={x(t)+3} y="16" className="gt-year">{new Date(parseDate(t)).getUTCFullYear()}</text>)}
    {m.ticks.map(t=><g key={t}><line x1={x(t)} x2={x(t)} y1={top-10} y2={height-12} className="gt-grid"/><text x={x(t)} y="39" textAnchor="middle" className="gt-tick">{tickLabel(t,locale,span)}</text></g>)}
    {data.map((r,i)=>{
-    const y=top+i*rowHeight, begin=r.validFrom, endDate=r.invalidFrom||end, sx=x(begin), ex=Math.max(sx+3,Math.min(plotX+plotW,x(endDate))), mx=x(r.mandatoryFrom), ix=x(r.invalidFrom||end), clickable=Boolean(r.url||onRecordClick);
-    return <g key={r.id??i} className={`gt-row${clickable?" gt-clickable":""}`} onClick={clickable?()=>activate(r):undefined}
-      onKeyDown={clickable?e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();activate(r)}}:undefined} tabIndex={clickable?0:undefined} role={clickable?"link":undefined}>
+    const y=top+i*rowHeight, begin=r.validFrom, endDate=r.invalidFrom||end, sx=x(begin), ex=Math.max(sx+3,Math.min(plotX+plotW,x(endDate))), mx=x(r.mandatoryFrom), ix=x(r.invalidFrom||end), focused=String(focusedRecordId)===String(r.id);
+    const focusKey = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); focusRecord(r); } };
+    return <g key={r.id??i} className={`gt-row${focused?" gt-row-focused":""}`}>
       <line x1="0" x2={width} y1={y+rowHeight-2} y2={y+rowHeight-2} className="gt-rowline"/>
-      {showRecordLabels&&<><text x="12" y={y+16} className="gt-id">{r.id}</text><text x="12" y={y+33} className="gt-label">{r.label||""}</text>{r.url&&<text x="12" y={y+49} className="gt-url">{r.url.length>36?r.url.slice(0,33)+"…":r.url}</text>}</>}
-      <rect x={sx} y={y+23} width={Math.max(2,ex-sx)} height="20" rx="6" fill={color.bar}><title>{`${r.id}: ${text.validFrom} ${fmt(r.validFrom,locale)}; ${text.mandatoryFrom} ${fmt(r.mandatoryFrom,locale)}; ${text.invalidFrom} ${r.invalidFrom?fmt(r.invalidFrom,locale):text.openEnded}`}</title></rect>
-      <circle cx={x(r.validFrom)} cy={y+33} r="6" fill={color.validFrom} stroke="#fff" strokeWidth="2"><title>{`${text.validFrom}: ${fmt(r.validFrom,locale)}`}</title></circle>
-      <path d={`M ${mx} ${y+24} l 9 9 l -9 9 l -9 -9 Z`} fill={color.mandatoryFrom} stroke="#fff" strokeWidth="2"><title>{`${text.mandatoryFrom}: ${fmt(r.mandatoryFrom,locale)}`}</title></path>
-      {r.invalidFrom?<circle cx={ix} cy={y+33} r="6.5" fill={color.invalidFrom} stroke="#fff" strokeWidth="2"><title>{`${text.invalidFrom}: ${fmt(r.invalidFrom,locale)}`}</title></circle>:<path d={`M ${ex-7} ${y+24} L ${ex+1} ${y+33} L ${ex-7} ${y+42}`} fill="none" stroke={color.bar} strokeWidth="2.3"><title>{text.openEnded}</title></path>}
-     </g>;
+      {showRecordLabels&&<>
+       <text x="12" y={y+16} className="gt-id gt-focusable" role="button" tabIndex="0" aria-label={`Focus ${r.id}`} onClick={()=>focusRecord(r)} onKeyDown={focusKey}>{r.id}</text>
+       <text x="12" y={y+33} className="gt-label gt-focusable" role="button" tabIndex="0" aria-label={`Focus ${r.label||r.id}`} onClick={()=>focusRecord(r)} onKeyDown={focusKey}>{r.label||""}</text>
+       {r.url&&<text x="12" y={y+49} className="gt-url gt-link" role="link" tabIndex="0" aria-label={`Open ${r.url}`} onClick={e=>{e.stopPropagation();activateLink(r)}} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();e.stopPropagation();activateLink(r)}}}>{r.url.length>36?r.url.slice(0,33)+"…":r.url}</text>}
+      </>}
+      <rect x={sx} y={y+23} width={Math.max(2,ex-sx)} height="20" rx="6" fill={color.bar} className="gt-bar-focusable" role="button" tabIndex="0" aria-label={`Focus timeline on ${r.id}`} onClick={()=>focusRecord(r)} onKeyDown={focusKey}><title>{`${r.id}: ${text.validFrom} ${fmt(r.validFrom,locale)}; ${text.mandatoryFrom} ${fmt(r.mandatoryFrom,locale)}; ${text.invalidFrom} ${r.invalidFrom?fmt(r.invalidFrom,locale):text.openEnded}`}</title></rect>
+      <circle cx={x(r.validFrom)} cy={y+33} r="6" fill={color.validFrom} stroke="#fff" strokeWidth="2" className="gt-bar-focusable" role="button" tabIndex="0" aria-label={`Focus timeline on ${r.id}`} onClick={()=>focusRecord(r)} onKeyDown={focusKey}><title>{`${text.validFrom}: ${fmt(r.validFrom,locale)}`}</title></circle>
+      <path d={`M ${mx} ${y+24} l 9 9 l -9 9 l -9 -9 Z`} fill={color.mandatoryFrom} stroke="#fff" strokeWidth="2" className="gt-bar-focusable" role="button" tabIndex="0" aria-label={`Focus timeline on ${r.id}`} onClick={()=>focusRecord(r)} onKeyDown={focusKey}><title>{`${text.mandatoryFrom}: ${fmt(r.mandatoryFrom,locale)}`}</title></path>
+      {r.invalidFrom?<circle cx={ix} cy={y+33} r="6.5" fill={color.invalidFrom} stroke="#fff" strokeWidth="2" className="gt-bar-focusable" role="button" tabIndex="0" aria-label={`Focus timeline on ${r.id}`} onClick={()=>focusRecord(r)} onKeyDown={focusKey}><title>{`${text.invalidFrom}: ${fmt(r.invalidFrom,locale)}`}</title></circle>:<path d={`M ${ex-7} ${y+24} L ${ex+1} ${y+33} L ${ex-7} ${y+42}`} fill="none" stroke={color.bar} strokeWidth="2.3" className="gt-bar-focusable" role="button" tabIndex="0" aria-label={`Focus timeline on ${r.id}`} onClick={()=>focusRecord(r)} onKeyDown={focusKey}><title>{text.openEnded}</title></path>}
+    </g>;
    })}
    {showToday&&<><line x1={tx} x2={tx} y1="22" y2={height-12} className="gt-todayline" stroke="#e5484d" strokeWidth="2" strokeDasharray="6 5"/><rect x={Math.max(plotX,Math.min(width-75,tx-30))} y="2" width="60" height="17" rx="5" className="gt-todaypill" fill="#e5484d" stroke="#ffffff" strokeWidth="1"/><text x={Math.max(plotX,Math.min(width-75,tx-30))+30} y="14" textAnchor="middle" className="gt-todaytext" fill="#ffffff" fontSize="9" fontWeight="850">{text.today}</text></>}
   </svg></div>

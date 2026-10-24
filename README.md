@@ -91,13 +91,13 @@ Records render in exactly the order they appear in `data`; no role/category fiel
 | `colors` | `object` | Built-in colors | Overrides `bar`, `validFrom`, `mandatoryFrom`, and `invalidFrom`. |
 | `showToday` | `boolean` | `true` | Show today line and legend entry. |
 | `showLegend` | `boolean` | `true` | Show the marker legend. |
-| `showRecordLabels` | `boolean` | `true` | Show IDs, labels and URLs to the left of the timeline. |
+| `showRecordLabels` | `boolean` | `true` | Show IDs, labels and URLs to the left of the timeline. IDs and labels can be clicked or keyboard-activated to focus the corresponding date range. |
 | `className` | `string` | `""` | Adds a class to the component root. |
 | `minWidth` | `number` | `760` | Minimum SVG width; narrow containers scroll horizontally. |
 | `rowHeight` | `number` | `72` | Vertical spacing per record. |
 | `labelWidth` | `number` | `280` | Width of the record information column. |
 | `chartWidth` | `number` | `850` | Width of the date plotting area. |
-| `onRecordClick` | `(record) => void` | — | Optional click callback. If supplied, it takes precedence over opening `record.url`. |
+| `onRecordClick` | `(record) => void` | — | Optional callback invoked when the record URL link is activated. If supplied, it handles the action instead of opening `record.url` automatically. |
 | `openLinksInNewTab` | `boolean` | `true` | Open record URLs in a new tab when no callback is supplied. New tabs use `noopener,noreferrer`. |
 
 ### Colors
@@ -133,7 +133,9 @@ Records render in exactly the order they appear in `data`; no role/category fiel
 
 ### URL behavior
 
-Set `url` on a record to make its row interactive. By default the URL opens in a new browser tab. Provide `onRecordClick` to handle navigation yourself (for example with React Router); when supplied, it overrides the built-in URL behavior. The URL is not rendered as trusted HTML. Validate or allowlist external URLs in the host application if input data is untrusted.
+Set `url` on a record to display a clickable URL link. **Only the URL itself activates navigation**; clicking elsewhere in the row does not open it. By default, the URL opens in a new browser tab. Provide `onRecordClick` to handle the link action yourself (for example with React Router); when supplied, it is called instead of opening `record.url` automatically.
+
+Clicking an entry’s **ID or label** focuses the timeline on that record’s date range. Click the same ID or label again to clear the focus and return to the full timeline. This interaction is also available by keyboard using Enter or Space. Records without any valid timeline dates cannot be focused. The URL is not rendered as trusted HTML. Validate or allowlist external URLs in the host application if input data is untrusted.
 
 ## CSS customization
 
