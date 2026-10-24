@@ -1,0 +1,66 @@
+{
+  "name": "@sambroda/gantt-timeline",
+  "version": "1.0.0",
+  "description": "Reusable React SVG Gantt timeline with configurable date markers",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite --host 0.0.0.0",
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build",
+    "test:local": "npm link && cd demo && npm link @YOUR_NPM_USERNAME/gantt-timeline"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "vite-plugin-dts": "^4.5.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "author": {
+    "name": "Sam Broda",
+    "url": "https://github.com/sambroda"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sambroda/gantt-timeline.git"
+  },
+  "homepage": "https://github.com/sambroda/gantt-timeline#readme",
+  "bugs": {
+    "url": "https://github.com/sambroda/gantt-timeline/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "gantt",
+    "timeline",
+    "svg",
+    "date",
+    "visualization"
+  ]
+}
