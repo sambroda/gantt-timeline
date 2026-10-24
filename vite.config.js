@@ -10,6 +10,7 @@ export default defineConfig({
       entry,
       name: "GanttTimeline",
       formats: ["es", "cjs"],
+      cssFileName: "style",
       fileName: (f) => (f === "es" ? "index.js" : "index.cjs"),
     },
     rollupOptions: {

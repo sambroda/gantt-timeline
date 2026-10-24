@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import GanttTimeline from "@sambroda/gantt-timeline";
+import "@sambroda/gantt-timeline/style.css";
 import "./style.css";
 
 const initial = [

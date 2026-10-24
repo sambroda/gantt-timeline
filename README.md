@@ -138,7 +138,14 @@ Clicking an entry’s **ID or label** focuses the timeline on that record’s da
 
 ## CSS customization
 
-The component stylesheet is imported by the package entry point. Class names use the `gt-` prefix to reduce collisions. Theme the chart with CSS custom properties:
+Import the package stylesheet alongside the component. This is required because library builds emit CSS as a separate file. Class names use the `gt-` prefix to reduce collisions.
+
+```jsx
+import GanttTimeline from "@sambroda/gantt-timeline";
+import "@sambroda/gantt-timeline/style.css";
+```
+
+Theme the chart with CSS custom properties:
 
 ```css
 .my-timeline {
