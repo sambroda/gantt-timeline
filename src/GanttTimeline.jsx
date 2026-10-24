@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import "./GanttTimeline.css";
 
 const DEFAULT_LABELS = {
@@ -94,6 +94,13 @@ export function GanttTimeline({
   openLinksInNewTab = true,
 }) {
   const [focusedRecordId, setFocusedRecordId] = useState(null);
+  const clipId = `gt-label-clip-${useId().replace(/:/g, "")}`;
+  const labelChars = Math.max(8, Math.floor((labelWidth - 28) / 7));
+  const urlChars = Math.max(8, Math.floor((labelWidth - 28) / 5.5));
+  const shorten = (value, limit) => {
+    const str = String(value ?? "");
+    return str.length > limit ? `${str.slice(0, limit - 1)}…` : str;
+  };
   const text = { ...DEFAULT_LABELS, ...labels };
   const color = {
     bar: "#438cf0",
@@ -204,6 +211,16 @@ export function GanttTimeline({
           role="img"
           aria-label={labels.ariaLabel || "Gantt timeline"}
         >
+          <defs>
+            <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+              <rect
+                x="0"
+                y="0"
+                width={Math.max(0, labelWidth - 20)}
+                height={height}
+              />
+            </clipPath>
+          </defs>
           {span > 150 &&
             m.yearTicks.map((t) => (
               <text key={`year-${t}`} x={x(t) + 3} y="16" className="gt-year">
@@ -257,31 +274,36 @@ export function GanttTimeline({
                       x="12"
                       y={y + 16}
                       className="gt-id gt-focusable"
+                      clipPath={`url(#${clipId})`}
                       role="button"
                       tabIndex="0"
                       aria-label={`Focus ${r.id}`}
                       onClick={() => focusRecord(r)}
                       onKeyDown={focusKey}
                     >
-                      {r.id}
+                      <title>{String(r.id ?? "")}</title>
+                      {shorten(r.id, labelChars)}
                     </text>
                     <text
                       x="12"
                       y={y + 33}
                       className="gt-label gt-focusable"
+                      clipPath={`url(#${clipId})`}
                       role="button"
                       tabIndex="0"
                       aria-label={`Focus ${r.label || r.id}`}
                       onClick={() => focusRecord(r)}
                       onKeyDown={focusKey}
                     >
-                      {r.label || ""}
+                      <title>{String(r.label || r.id || "")}</title>
+                      {shorten(r.label || "", labelChars)}
                     </text>
                     {r.url && (
                       <text
                         x="12"
                         y={y + 49}
                         className="gt-url gt-link"
+                        clipPath={`url(#${clipId})`}
                         role="link"
                         tabIndex="0"
                         aria-label={`Open ${r.url}`}
@@ -297,7 +319,8 @@ export function GanttTimeline({
                           }
                         }}
                       >
-                        {r.url.length > 36 ? r.url.slice(0, 33) + "…" : r.url}
+                        <title>{r.url}</title>
+                        {shorten(r.url, urlChars)}
                       </text>
                     )}
                   </>

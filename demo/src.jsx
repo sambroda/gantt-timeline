@@ -7,7 +7,8 @@ import "./style.css";
 const initial = [
   {
     id: "V-01",
-    label: "Previous agreement",
+    label:
+      "Previous agreement jsdnfjk fkjsdf js adfkjs fkjs fdkjs fskfm nsejf ksjd fks djkfjs fk sdkjf sk fjksjd s eadfj dskjdsf k sdkjefs kj ",
     validFrom: "2025-09-26",
     mandatoryFrom: "2026-10-16",
     invalidFrom: null,
