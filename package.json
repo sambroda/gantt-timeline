@@ -1,6 +1,6 @@
 {
   "name": "@sambroda/gantt-timeline",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Reusable React SVG Gantt timeline with configurable date markers",
   "type": "module",
   "main": "./dist/index.cjs",
