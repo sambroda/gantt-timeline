@@ -32,13 +32,35 @@ const fmt = (v, locale) =>
     : "—";
 function ticks(start, end) {
   const span = Math.max(1, days(start, end));
-  // Choose calendar-aligned intervals so labels remain readable and predictable.
-  const stepMonths =
-    span > 1100 ? 6 : span > 520 ? 3 : span > 260 ? 2 : span > 150 ? 1 : 0;
   const out = [];
+
+  // For multi-year ranges, use calendar-aligned month/year intervals.
+  // Very long ranges must not generate monthly ticks: they overwhelm the axis.
+  if (span > 1100) {
+    const years = Math.max(
+      1,
+      new Date(parseDate(end)).getUTCFullYear() -
+        new Date(parseDate(start)).getUTCFullYear(),
+    );
+    const targetStep = years / 9;
+    const yearSteps = [1, 2, 5, 10, 20, 25, 50, 100, 200, 500];
+    const stepYears =
+      yearSteps.find((step) => step >= targetStep) ??
+      Math.ceil(targetStep / 500) * 500;
+    const startYear = new Date(parseDate(start)).getUTCFullYear();
+    const endYear = new Date(parseDate(end)).getUTCFullYear();
+    let year = Math.ceil(startYear / stepYears) * stepYears;
+
+    for (; year <= endYear; year += stepYears) {
+      out.push(`${String(year).padStart(4, "0")}-01-01`);
+    }
+    return out;
+  }
+
+  const stepMonths = span > 520 ? 3 : span > 260 ? 2 : span > 150 ? 1 : 0;
   if (stepMonths) {
-    const startDate = new Date(parseDate(start)),
-      endDate = new Date(parseDate(end));
+    const startDate = new Date(parseDate(start));
+    const endDate = new Date(parseDate(end));
     let cursor = new Date(
       Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), 1),
     );
@@ -54,12 +76,14 @@ function ticks(start, end) {
       span > 75 ? 14 : span > 35 ? 7 : Math.max(1, Math.ceil(span / 8));
     for (let i = 0; i <= span; i += step) out.push(addDays(start, i));
   }
+
   if (!out.length || out[0] !== start) out.unshift(start);
   if (out[out.length - 1] !== end) out.push(end);
   return out;
 }
 function tickLabel(v, locale, span) {
   const d = new Date(parseDate(v));
+  if (span > 1100) return String(d.getUTCFullYear());
   if (span > 150)
     return new Intl.DateTimeFormat(locale, {
       month: "short",
