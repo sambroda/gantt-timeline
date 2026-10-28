@@ -94,7 +94,9 @@ export function GanttTimeline({
   openLinksInNewTab = true,
 }) {
   const [focusedRecordId, setFocusedRecordId] = useState(null);
-  const clipId = `gt-label-clip-${useId().replace(/:/g, "")}`;
+  const clipSuffix = useId().replace(/:/g, "");
+  const clipId = `gt-label-clip-${clipSuffix}`;
+  const plotClipId = `gt-plot-clip-${clipSuffix}`;
   const labelChars = Math.max(8, Math.floor((labelWidth - 28) / 7));
   const urlChars = Math.max(8, Math.floor((labelWidth - 28) / 5.5));
   const shorten = (value, limit) => {
@@ -220,6 +222,14 @@ export function GanttTimeline({
                 height={height}
               />
             </clipPath>
+            <clipPath id={plotClipId} clipPathUnits="userSpaceOnUse">
+              <rect
+                x={plotX}
+                y={top - 10}
+                width={Math.max(0, plotW)}
+                height={Math.max(0, height - top - 2)}
+              />
+            </clipPath>
           </defs>
           {span > 150 &&
             m.yearTicks.map((t) => (
@@ -245,8 +255,10 @@ export function GanttTimeline({
             const y = top + i * rowHeight,
               begin = r.validFrom,
               endDate = r.invalidFrom || end,
-              sx = x(begin),
-              ex = Math.max(sx + 3, Math.min(plotX + plotW, x(endDate))),
+              rawSx = x(begin),
+              rawEx = x(endDate),
+              sx = Math.max(plotX, Math.min(plotX + plotW, rawSx)),
+              ex = Math.max(sx, Math.min(plotX + plotW, rawEx)),
               mx = x(r.mandatoryFrom),
               ix = x(r.invalidFrom || end),
               focused = String(focusedRecordId) === String(r.id);
@@ -325,58 +337,28 @@ export function GanttTimeline({
                     )}
                   </>
                 )}
-                <rect
-                  x={sx}
-                  y={y + 23}
-                  width={Math.max(2, ex - sx)}
-                  height="20"
-                  rx="6"
-                  fill={color.bar}
-                  className="gt-bar-focusable"
-                  role="button"
-                  tabIndex="0"
-                  aria-label={`Focus timeline on ${r.id}`}
-                  onClick={() => focusRecord(r)}
-                  onKeyDown={focusKey}
-                >
-                  <title>{`${r.id}: ${text.validFrom} ${fmt(r.validFrom, locale)}; ${text.mandatoryFrom} ${fmt(r.mandatoryFrom, locale)}; ${text.invalidFrom} ${r.invalidFrom ? fmt(r.invalidFrom, locale) : text.openEnded}`}</title>
-                </rect>
-                <circle
-                  cx={x(r.validFrom)}
-                  cy={y + 33}
-                  r="6"
-                  fill={color.validFrom}
-                  stroke="#fff"
-                  strokeWidth="2"
-                  className="gt-bar-focusable"
-                  role="button"
-                  tabIndex="0"
-                  aria-label={`Focus timeline on ${r.id}`}
-                  onClick={() => focusRecord(r)}
-                  onKeyDown={focusKey}
-                >
-                  <title>{`${text.validFrom}: ${fmt(r.validFrom, locale)}`}</title>
-                </circle>
-                <path
-                  d={`M ${mx} ${y + 24} l 9 9 l -9 9 l -9 -9 Z`}
-                  fill={color.mandatoryFrom}
-                  stroke="#fff"
-                  strokeWidth="2"
-                  className="gt-bar-focusable"
-                  role="button"
-                  tabIndex="0"
-                  aria-label={`Focus timeline on ${r.id}`}
-                  onClick={() => focusRecord(r)}
-                  onKeyDown={focusKey}
-                >
-                  <title>{`${text.mandatoryFrom}: ${fmt(r.mandatoryFrom, locale)}`}</title>
-                </path>
-                {r.invalidFrom ? (
+                <g clipPath={`url(#${plotClipId})`}>
+                  <rect
+                    x={sx}
+                    y={y + 23}
+                    width={Math.max(2, ex - sx)}
+                    height="20"
+                    rx="6"
+                    fill={color.bar}
+                    className="gt-bar-focusable"
+                    role="button"
+                    tabIndex="0"
+                    aria-label={`Focus timeline on ${r.id}`}
+                    onClick={() => focusRecord(r)}
+                    onKeyDown={focusKey}
+                  >
+                    <title>{`${r.id}: ${text.validFrom} ${fmt(r.validFrom, locale)}; ${text.mandatoryFrom} ${fmt(r.mandatoryFrom, locale)}; ${text.invalidFrom} ${r.invalidFrom ? fmt(r.invalidFrom, locale) : text.openEnded}`}</title>
+                  </rect>
                   <circle
-                    cx={ix}
+                    cx={x(r.validFrom)}
                     cy={y + 33}
-                    r="6.5"
-                    fill={color.invalidFrom}
+                    r="6"
+                    fill={color.validFrom}
                     stroke="#fff"
                     strokeWidth="2"
                     className="gt-bar-focusable"
@@ -386,14 +368,13 @@ export function GanttTimeline({
                     onClick={() => focusRecord(r)}
                     onKeyDown={focusKey}
                   >
-                    <title>{`${text.invalidFrom}: ${fmt(r.invalidFrom, locale)}`}</title>
+                    <title>{`${text.validFrom}: ${fmt(r.validFrom, locale)}`}</title>
                   </circle>
-                ) : (
                   <path
-                    d={`M ${ex - 7} ${y + 24} L ${ex + 1} ${y + 33} L ${ex - 7} ${y + 42}`}
-                    fill="none"
-                    stroke={color.bar}
-                    strokeWidth="2.3"
+                    d={`M ${mx} ${y + 24} l 9 9 l -9 9 l -9 -9 Z`}
+                    fill={color.mandatoryFrom}
+                    stroke="#fff"
+                    strokeWidth="2"
                     className="gt-bar-focusable"
                     role="button"
                     tabIndex="0"
@@ -401,9 +382,42 @@ export function GanttTimeline({
                     onClick={() => focusRecord(r)}
                     onKeyDown={focusKey}
                   >
-                    <title>{text.openEnded}</title>
+                    <title>{`${text.mandatoryFrom}: ${fmt(r.mandatoryFrom, locale)}`}</title>
                   </path>
-                )}
+                  {r.invalidFrom ? (
+                    <circle
+                      cx={ix}
+                      cy={y + 33}
+                      r="6.5"
+                      fill={color.invalidFrom}
+                      stroke="#fff"
+                      strokeWidth="2"
+                      className="gt-bar-focusable"
+                      role="button"
+                      tabIndex="0"
+                      aria-label={`Focus timeline on ${r.id}`}
+                      onClick={() => focusRecord(r)}
+                      onKeyDown={focusKey}
+                    >
+                      <title>{`${text.invalidFrom}: ${fmt(r.invalidFrom, locale)}`}</title>
+                    </circle>
+                  ) : (
+                    <path
+                      d={`M ${ex - 7} ${y + 24} L ${ex + 1} ${y + 33} L ${ex - 7} ${y + 42}`}
+                      fill="none"
+                      stroke={color.bar}
+                      strokeWidth="2.3"
+                      className="gt-bar-focusable"
+                      role="button"
+                      tabIndex="0"
+                      aria-label={`Focus timeline on ${r.id}`}
+                      onClick={() => focusRecord(r)}
+                      onKeyDown={focusKey}
+                    >
+                      <title>{text.openEnded}</title>
+                    </path>
+                  )}
+                </g>
               </g>
             );
           })}

@@ -5,6 +5,7 @@ A reusable React SVG Gantt component distributed as an npm package. The chart is
 ## Project links and maintainer
 
 - **Author / maintainer:** Sam Broda
+- **Contact:** [nasadorbs@gmail.com](mailto:nasadorbs@gmail.com)
 - **GitHub repository:** https://github.com/sambroda/gantt-timeline
 - **Documentation:** https://github.com/sambroda/gantt-timeline#readme
 - **Issue tracker:** https://github.com/sambroda/gantt-timeline/issues
